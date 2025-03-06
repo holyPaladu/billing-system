@@ -14,6 +14,7 @@ services:
       DATABASE_USER: postgres
       DATABASE_PASSWORD: postgres
       DATABASE_NAME: authdb
+      JWT_SECRET: authjwtsecretkey
     depends_on:
       - postgres-db
     volumes:
