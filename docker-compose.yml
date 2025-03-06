@@ -9,7 +9,29 @@ services:
       - "3000:3000"
     environment:
       NODE_ENV: development
+      DATABASE_HOST: postgres-db
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_NAME: authdb
+    depends_on:
+      - postgres-db
     volumes:
       - ./auth-service:/app
-      - /app/node_modules
-    command: npm run start:dev
+      - /app/node_modules # Добавляем исключение для node_modules
+    command: npm run start
+
+  postgres-db:
+    image: postgres:15
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: authdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
