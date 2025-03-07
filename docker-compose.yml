@@ -43,6 +43,8 @@ services:
       DATABASE_USER: postgres
       DATABASE_PASSWORD: postgres
       DATABASE_NAME: notificationdb
+      EMAIL_USER: ironicpaladin2907@gmail.com
+      EMAIL_PASS: hktuoyvtdfgmdvws
     depends_on:
       - postgres-db
       - kafka
