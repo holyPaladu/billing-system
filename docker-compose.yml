@@ -1,5 +1,9 @@
 version: "3.8"
 
+networks:
+  app-networks:
+    driver: bridge
+
 services:
   auth-service:
     build:
@@ -19,6 +23,8 @@ services:
     depends_on:
       - postgres-db
       - kafka
+    networks:
+      - app-networks
     volumes:
       - ./auth-service:/app
       - /app/node_modules # Добавляем исключение для node_modules
@@ -40,6 +46,8 @@ services:
     depends_on:
       - postgres-db
       - kafka
+    networks:
+      - app-networks
     volumes:
       - ./notification-service:/app
       - /app/node_modules
@@ -57,6 +65,8 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-networks
 
   kafka:
     image: docker.io/bitnami/kafka:3.9
@@ -73,6 +83,8 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLERs
+    networks:
+      - app-networks
 
 volumes:
   pgdata:
