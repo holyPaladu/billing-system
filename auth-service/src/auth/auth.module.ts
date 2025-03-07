@@ -8,13 +8,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { RefreshTokenStrategy } from './strategies/refresh.strategy';
 import { UsersModule } from 'src/users/users.module';
-import { KafkaModule } from 'src/kafka/kafka.module';
+// import { KafkaModule } from 'src/kafka/kafka.module';
 
 @Module({
   imports: [
     PassportModule,
     UsersModule,
-    KafkaModule,
+    // KafkaModule,
     TypeOrmModule.forFeature([User]),
     JwtModule.register({}),
   ],

@@ -10,7 +10,6 @@ import { User } from '../users/entities/user.entity';
 import { RegisterDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
-// import { KafkaService } from 'src/kafka/kafka.service';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +17,6 @@ export class AuthService {
     @InjectRepository(User) private userRepository: Repository<User>,
     private readonly userService: UsersService,
     private jwtService: JwtService,
-    // private readonly kafkaService: KafkaService,
   ) {}
 
   //! token
@@ -78,8 +76,6 @@ export class AuthService {
     });
 
     await this.userRepository.save(newUser);
-    // Отправляем сообщение в Kafka
-    // await this.kafkaService.sendMessage('user_registered', user.email);
     return { message: 'Регистрация успешна' };
   }
 }
