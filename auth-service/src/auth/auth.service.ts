@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   UnauthorizedException,
+  Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -10,6 +11,7 @@ import { User } from '../users/entities/user.entity';
 import { RegisterDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
+import { ClientKafka, EventPattern } from '@nestjs/microservices';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +19,7 @@ export class AuthService {
     @InjectRepository(User) private userRepository: Repository<User>,
     private readonly userService: UsersService,
     private jwtService: JwtService,
+    @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
   ) {}
 
   //! token
@@ -76,6 +79,13 @@ export class AuthService {
     });
 
     await this.userRepository.save(newUser);
+
+    // Отправляем сообщение в Kafka
+    this.kafkaClient.emit('user.registered', {
+      email: user.email,
+      timestamp: new Date().toISOString(),
+    });
+
     return { message: 'Регистрация успешна' };
   }
 }

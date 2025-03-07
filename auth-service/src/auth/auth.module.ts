@@ -8,15 +8,28 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { RefreshTokenStrategy } from './strategies/refresh.strategy';
 import { UsersModule } from 'src/users/users.module';
-// import { KafkaModule } from 'src/kafka/kafka.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
     PassportModule,
     UsersModule,
-    // KafkaModule,
     TypeOrmModule.forFeature([User]),
     JwtModule.register({}),
+    ClientsModule.register([
+      {
+        name: 'KAFKA_SERVICE',
+        transport: Transport.KAFKA,
+        options: {
+          client: {
+            brokers: ['kafka:9092'], // Имя контейнера Kafka из docker-compose
+          },
+          producer: {
+            allowAutoTopicCreation: true, // Автосоздание топиков (опционально)
+          },
+        },
+      },
+    ]),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, RefreshTokenStrategy],

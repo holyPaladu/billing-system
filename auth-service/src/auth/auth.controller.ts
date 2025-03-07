@@ -6,6 +6,7 @@ import {
   Get,
   UseGuards,
   Req,
+  Inject,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto, RefreshDto } from './dto/auth.dto';
