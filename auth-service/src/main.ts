@@ -21,7 +21,7 @@ async function bootstrap() {
     transport: Transport.KAFKA,
     options: {
       client: {
-        brokers: ['kafka:9092'], // Указываем адрес Kafka из docker-compose
+        brokers: ['kafka:9092'], // Kafka broker
       },
       consumer: {
         groupId: 'auth-consumer',
