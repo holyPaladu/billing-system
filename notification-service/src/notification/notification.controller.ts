@@ -11,6 +11,6 @@ export class NotificationController {
   @EventPattern('user.registered')
   async handleUserLogin(@Payload() data: any) {
     this.logger.log(`Received event: ${JSON.stringify(data)}`);
-    console.log(`${data}`);
+    console.log(JSON.stringify(data, null, 2));
   }
 }
