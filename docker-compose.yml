@@ -6,7 +6,7 @@ services:
       context: ./auth-service
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "8080:3000"
     environment:
       NODE_ENV: development
       DATABASE_HOST: postgres-db
@@ -15,6 +15,7 @@ services:
       DATABASE_PASSWORD: postgres
       DATABASE_NAME: authdb
       JWT_SECRET: authjwtsecretkey
+      JWT_REFRESH_SECRET: supersecretrefreshkey
     depends_on:
       - postgres-db
     volumes:

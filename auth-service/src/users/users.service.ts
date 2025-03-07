@@ -13,6 +13,12 @@ export class UsersService {
     const users = await this.userRepository.find();
     return users.map(({ password, ...user }) => user);
   }
+  async findByEmail(email: string) {
+    return this.userRepository.findOne({ where: { email } });
+  }
+  async findById(id: number) {
+    return this.userRepository.findOne({ where: { id } });
+  }
 
   async deleteById(id: number): Promise<{ success: boolean }> {
     const user = await this.userRepository.findOne({ where: { id } });
@@ -20,5 +26,9 @@ export class UsersService {
 
     await this.userRepository.remove(user);
     return { success: true };
+  }
+
+  async updateRefreshToken(userId: number, refreshToken: string) {
+    await this.userRepository.update(userId, { refreshToken });
   }
 }

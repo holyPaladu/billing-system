@@ -6,15 +6,18 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { User } from '../users/entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
+import { RefreshTokenStrategy } from './strategies/refresh.strategy';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
     PassportModule,
+    UsersModule,
     TypeOrmModule.forFeature([User]),
     JwtModule.register({}),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, RefreshTokenStrategy],
   exports: [JwtStrategy, AuthService],
 })
 export class AuthModule {}
