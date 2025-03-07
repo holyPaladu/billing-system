@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, Body, UseInterceptors, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/auth.dto';
 import { NoFilesInterceptor } from '@nestjs/platform-express';
@@ -22,7 +22,6 @@ export class AuthController {
   @ApiBody({ type: RegisterDto })
   @ApiResponse({ status: 201, description: 'Successful register' })
   async register(@Body() user: RegisterDto) {
-    console.log('Данные пользователя:', user);
     return this.authService.register(user);
   }
 }

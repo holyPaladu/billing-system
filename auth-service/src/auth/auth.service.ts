@@ -2,7 +2,7 @@ import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
-import { User } from './entities/user.entity';
+import { User } from '../users/entities/user.entity';
 import { RegisterDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 
@@ -14,7 +14,6 @@ export class AuthService {
   ) {}
 
   async register(user: RegisterDto) {
-    console.log('Полученные данные:', user);
     const existingUser = await this.userRepository.findOne({
       where: { email: user.email },
     });
@@ -29,7 +28,6 @@ export class AuthService {
     });
 
     await this.userRepository.save(newUser);
-
     return { message: 'Регистрация успешна' };
   }
 }
