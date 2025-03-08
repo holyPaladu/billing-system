@@ -1,6 +1,15 @@
-import { Controller, Delete, Get, Param } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Param,
+  Get,
+  UseGuards,
+  Req,
+  Inject,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('users')
 export class UsersController {
@@ -10,6 +19,13 @@ export class UsersController {
   @ApiOperation({ summary: 'get all users' })
   async getALLUsers() {
     return this.usersService.findAll();
+  }
+  @Get('profile')
+  @ApiOperation({ summary: 'Protected data' })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  getProfile(@Req() req) {
+    return req.user;
   }
 
   @Delete(':id')

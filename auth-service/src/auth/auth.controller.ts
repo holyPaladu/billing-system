@@ -1,25 +1,14 @@
-import {
-  Controller,
-  Post,
-  Body,
-  UseInterceptors,
-  Get,
-  UseGuards,
-  Req,
-  Inject,
-} from '@nestjs/common';
+import { Controller, Post, Body, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto, RefreshDto } from './dto/auth.dto';
+import { RegisterDto, RefreshDto, LoginDto } from './dto/auth.dto';
 import { NoFilesInterceptor } from '@nestjs/platform-express';
 import {
-  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Authorization')
 @Controller('auth')
@@ -40,9 +29,9 @@ export class AuthController {
   @UseInterceptors(NoFilesInterceptor())
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'User login' })
-  @ApiBody({ type: RegisterDto })
+  @ApiBody({ type: LoginDto })
   @ApiResponse({ status: 200, description: 'Successful login' })
-  async login(@Body() body: RegisterDto) {
+  async login(@Body() body: LoginDto) {
     const user = await this.authService.validateUser(body);
     return this.authService.login(user);
   }
@@ -55,13 +44,5 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Token success refreshed' })
   async refresh(@Body() { userId, refreshToken }: RefreshDto) {
     return this.authService.refreshTokens(userId, refreshToken);
-  }
-
-  @Get('profile')
-  @ApiOperation({ summary: 'Protected data' })
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
-  getProfile(@Req() req) {
-    return req.user;
   }
 }

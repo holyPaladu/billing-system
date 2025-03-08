@@ -15,8 +15,7 @@ export class NotificationController {
   @EventPattern('user.registered')
   async handleUserLogin(@Payload() data: any) {
     this.logger.log(`Received event: ${JSON.stringify(data)}`);
-    console.log(JSON.stringify(data, null, 2));
-    const { email } = data;
-    this.emailService.sendVerificationEmail(email, '1234');
+    const { email, ottp } = data;
+    this.emailService.sendVerificationEmail(email, String(ottp));
   }
 }

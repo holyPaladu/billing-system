@@ -72,10 +72,14 @@ export class AuthService {
       throw new ConflictException('Пользователь с таким email уже существует');
     }
 
+    // Генерация OTP-кода
+    const ottp = Math.floor(1000 + Math.random() * 9000); // 4-значный код
+
     const hashedPassword = await bcrypt.hash(user.password, 10);
     const newUser = this.userRepository.create({
       email: user.email,
       password: hashedPassword,
+      ottp: ottp,
     });
 
     await this.userRepository.save(newUser);
@@ -83,6 +87,7 @@ export class AuthService {
     // Отправляем сообщение в Kafka
     this.kafkaClient.emit('user.registered', {
       email: user.email,
+      ottp: ottp,
       timestamp: new Date().toISOString(),
     });
 

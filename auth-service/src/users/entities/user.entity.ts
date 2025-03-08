@@ -23,6 +23,9 @@ export class User {
   @Column({ nullable: true })
   refreshToken: string;
 
+  @Column({ nullable: true })
+  ottp: number;
+
   @Column({ default: false })
   is_email_verified: boolean;
 
