@@ -36,3 +36,15 @@ export class LoginDto {
   @IsNotEmpty()
   password: string;
 }
+
+export class ottpDto {
+  @ApiProperty({ example: 'user@example.com', description: 'User email' })
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @ApiProperty({ example: '123456', description: 'Ottp' })
+  @IsNumber()
+  @IsNotEmpty()
+  ottp: number;
+}

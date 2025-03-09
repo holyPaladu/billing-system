@@ -1,6 +1,6 @@
 import { Controller, Post, Body, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto, RefreshDto, LoginDto } from './dto/auth.dto';
+import { RegisterDto, RefreshDto, LoginDto, ottpDto } from './dto/auth.dto';
 import { NoFilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiBody,
@@ -23,6 +23,24 @@ export class AuthController {
   @ApiResponse({ status: 201, description: 'Successful register' })
   async register(@Body() user: RegisterDto) {
     return this.authService.register(user);
+  }
+
+  @Post('check_email')
+  @UseInterceptors(NoFilesInterceptor())
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Check email' })
+  @ApiBody({ type: ottpDto })
+  @ApiResponse({ status: 200, description: 'Код подтвержден' })
+  @ApiResponse({
+    status: 409,
+    description: 'Код подтверждения неверный или истёк.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Dont find this email',
+  })
+  async check_email(@Body() dto: ottpDto) {
+    return this.authService.ottpChecking(dto);
   }
 
   @Post('login')

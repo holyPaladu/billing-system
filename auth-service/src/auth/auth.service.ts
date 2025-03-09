@@ -3,15 +3,17 @@ import {
   ConflictException,
   UnauthorizedException,
   Inject,
+  NotFoundException,
+  HttpStatus,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { User } from '../users/entities/user.entity';
-import { RegisterDto } from './dto/auth.dto';
+import { RegisterDto, ottpDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
-import { ClientKafka, EventPattern } from '@nestjs/microservices';
+import { ClientKafka } from '@nestjs/microservices';
 
 @Injectable()
 export class AuthService {
@@ -92,5 +94,22 @@ export class AuthService {
     });
 
     return { message: 'Регистрация успешна' };
+  }
+  async ottpChecking(dto: ottpDto) {
+    const user = await this.userService.findByEmail(dto.email);
+    if (!user) throw new NotFoundException('Dont find this email');
+
+    if (user.ottp !== Number(dto.ottp)) {
+      throw new ConflictException('Код подтверждения неверный или истёк.');
+    }
+    await this.userRepository.update(
+      { id: user.id },
+      { ottp: null, is_email_verified: true },
+    );
+
+    return {
+      status: HttpStatus.OK,
+      message: 'Код подтвержден',
+    };
   }
 }
