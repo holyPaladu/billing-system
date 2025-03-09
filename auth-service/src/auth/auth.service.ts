@@ -59,6 +59,9 @@ export class AuthService {
     if (!isPasswordValid)
       throw new UnauthorizedException('Invalid credentials');
 
+    if (!user.is_email_verified)
+      throw new ConflictException('Your email dont verified');
+
     return user;
   }
   async login(user: any) {
