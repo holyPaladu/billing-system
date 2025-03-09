@@ -55,6 +55,31 @@ services:
       - /app/node_modules
     command: npm run start
 
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    ports:
+      - "8082:3002"
+    environment:
+      NODE_ENV: development
+      DATABASE_HOST: postgres-db
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_NAME: productdb
+      JWT_SECRET: authjwtsecretkey
+      JWT_REFRESH_SECRET: supersecretrefreshkey
+    depends_on:
+      - postgres-db
+      - kafka
+    networks:
+      - app-networks
+    volumes:
+      - ./product-service:/app
+      - /app/node_modules
+    command: npm run start
+
   postgres-db:
     image: postgres:15
     restart: always
