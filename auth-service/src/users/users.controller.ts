@@ -20,12 +20,15 @@ export class UsersController {
   async getALLUsers() {
     return this.usersService.findAll();
   }
+
   @Get('profile')
   @ApiOperation({ summary: 'Protected data' })
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
-  getProfile(@Req() req) {
-    return req.user;
+  async getProfile(@Req() req) {
+    const user = await this.usersService.findById(req.user.userId);
+    const { password, ottp, ...safeUser } = user;
+    return safeUser;
   }
 
   @Delete(':id')
