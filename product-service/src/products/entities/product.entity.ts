@@ -11,7 +11,7 @@ import {
 @Entity('products')
 export class Product {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
 
   @Column()
   name: string;
@@ -19,17 +19,17 @@ export class Product {
   @Column('text')
   description: string;
 
-  @Column()
+  @Column('decimal', { precision: 10, scale: 2 })
   price: number;
 
   @Column({ default: false })
   is_active: boolean;
 
-  @ManyToOne(() => Category, (category) => category.products_id, {
+  @ManyToOne(() => Category, (category) => category.products, {
     nullable: false,
     onDelete: 'CASCADE',
   })
-  category_id: Category;
+  category: Category;
 
   @Column()
   @CreateDateColumn()

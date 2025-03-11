@@ -11,7 +11,7 @@ import {
 @Entity('categories')
 export class Category {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
 
   @Column()
   name: string;
@@ -20,13 +20,13 @@ export class Category {
     nullable: true,
     onDelete: 'CASCADE',
   })
-  parent_id: Category | null;
+  parent: Category | null;
 
-  @OneToMany(() => Category, (category) => category.parent_id)
+  @OneToMany(() => Category, (category) => category.parent)
   children: Category[];
 
-  @OneToMany(() => Product, (product) => product.category_id)
-  products_id: Product[];
+  @OneToMany(() => Product, (product) => product.category)
+  products: Product[];
 
   @UpdateDateColumn()
   updatedAt: Date;

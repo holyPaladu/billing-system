@@ -1,22 +1,30 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
+  Param,
+  Post,
   Query,
   Req,
   UseGuards,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiExtraModels,
   ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { GetProductsDto } from './dto/product.dto';
+import { CreateProductDto, GetProductsDto } from './dto/product.dto';
+import { NoFilesInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Products')
 @ApiExtraModels(GetProductsDto) // Автоматически документирует DTO
@@ -33,7 +41,6 @@ export class ProductsController {
   }
 
   @Get()
-  @UsePipes(new ValidationPipe({ transform: true })) // Автоматически преобразует строки в числа
   @ApiResponse({
     status: 200,
     description: 'Список продуктов с пагинацией',
@@ -55,6 +62,24 @@ export class ProductsController {
     },
   })
   async getAll(@Query() query: GetProductsDto) {
-    return this.productsService.getAllProduct(query.offset, query.limit);
+    return this.productsService.getAllProduct(query);
+  }
+
+  @Post()
+  @UseInterceptors(NoFilesInterceptor())
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: CreateProductDto })
+  @ApiResponse({ status: 201, description: 'Продукт успешно создан' })
+  @ApiResponse({ status: 404, description: 'Категория не найдена' })
+  async create(@Body() createProductDto: CreateProductDto) {
+    return this.productsService.createProduct(createProductDto);
+  }
+
+  @Delete(':id')
+  @ApiResponse({ status: 200, description: 'Продукт удалён' })
+  @ApiResponse({ status: 404, description: 'Продукт не найден' })
+  async delete(@Param('id') id: string) {
+    await this.productsService.deleteProduct(id);
+    return { message: 'Product deleted successfully' };
   }
 }
