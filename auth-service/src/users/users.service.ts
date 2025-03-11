@@ -11,7 +11,7 @@ export class UsersService {
 
   async findAll() {
     const users = await this.userRepository.find();
-    return users.map(({ password, ...user }) => user);
+    return users.map(({ password, ottp, ...user }) => user);
   }
   async findByEmail(email: string) {
     return this.userRepository.findOne({ where: { email } });
