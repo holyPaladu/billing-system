@@ -2,17 +2,28 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
-import { CreateProductDto, GetProductsDto } from './dto/product.dto';
-import { Category } from 'src/categories/entyties/category.entity';
+import {
+  CreateProductDto,
+  GetProductsDto,
+  UpdateActiveDto,
+  UpdateProductDto,
+} from './dto/product.dto';
+import { CategoriesService } from 'src/categories/categories.service';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
-    @InjectRepository(Category)
-    private categoryRepository: Repository<Category>,
+    private readonly categoryService: CategoriesService,
   ) {}
+
+  //! BASE SERVICE
+  async findProductById(id: string) {
+    const product = await this.productRepository.findOne({ where: { id: id } });
+    if (!product) throw new NotFoundException('Not found that product');
+    return product;
+  }
 
   async getAllProduct(query: GetProductsDto) {
     const [products, total] = await this.productRepository.findAndCount({
@@ -34,12 +45,7 @@ export class ProductsService {
     const { name, description, price, is_active, category } = createProductDto;
 
     // Проверяем, существует ли категория
-    const categoryExist = await this.categoryRepository.findOne({
-      where: { id: category },
-    });
-    if (!categoryExist) {
-      throw new NotFoundException('Category not found');
-    }
+    const categoryExist = await this.categoryService.findCategoryById(category);
 
     // Создаём продукт
     const product = this.productRepository.create({
@@ -50,6 +56,34 @@ export class ProductsService {
       category: categoryExist, // Связываем продукт с категорией
     });
 
+    return this.productRepository.save(product);
+  }
+
+  async updateById(id: string, updatedData: UpdateProductDto) {
+    const product = await this.findProductById(id);
+
+    if (updatedData.categoryId) {
+      const category = await this.categoryService.findCategoryById(
+        updatedData.categoryId,
+      );
+      product.category = category;
+    }
+
+    // Убираем undefined, чтобы не затирать поля
+    const filteredData = Object.fromEntries(
+      Object.entries(updatedData).filter(
+        ([_, v]) => v !== undefined && v !== '',
+      ),
+    );
+    Object.assign(product, filteredData);
+    return this.productRepository.save(product);
+  }
+
+  async updateActiveById(id: string, updatedData: UpdateActiveDto) {
+    const product = await this.findProductById(id);
+    if (updatedData.is_active !== null || updatedData.is_active !== undefined) {
+      product.is_active = updatedData.is_active;
+    }
     return this.productRepository.save(product);
   }
 

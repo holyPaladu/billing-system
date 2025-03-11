@@ -57,3 +57,52 @@ export class CreateProductDto {
   @IsUUID()
   category: string;
 }
+
+export class UpdateProductDto {
+  @ApiProperty({
+    example: 'name',
+    description: 'New name for product',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @ApiProperty({
+    example: 'text..',
+    description: 'Product description',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiProperty({
+    example: '10.00',
+    description: 'Product new price',
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  price?: number;
+
+  @ApiProperty({
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    description: "Product's category id",
+    required: false,
+  })
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
+}
+
+export class UpdateActiveDto {
+  @ApiProperty({
+    example: false,
+    description: 'Update visibillity',
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  is_active?: boolean;
+}

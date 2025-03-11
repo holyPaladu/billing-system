@@ -3,8 +3,11 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
+  Patch,
   Post,
+  Put,
   Query,
   Req,
   UseGuards,
@@ -23,7 +26,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { CreateProductDto, GetProductsDto } from './dto/product.dto';
+import {
+  CreateProductDto,
+  GetProductsDto,
+  UpdateActiveDto,
+  UpdateProductDto,
+} from './dto/product.dto';
 import { NoFilesInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Products')
@@ -71,7 +79,7 @@ export class ProductsController {
   @ApiBody({ type: CreateProductDto })
   @ApiResponse({ status: 201, description: 'Продукт успешно создан' })
   @ApiResponse({ status: 404, description: 'Категория не найдена' })
-  async create(@Body() createProductDto: CreateProductDto) {
+  async createProduct(@Body() createProductDto: CreateProductDto) {
     return this.productsService.createProduct(createProductDto);
   }
 
@@ -81,5 +89,24 @@ export class ProductsController {
   async delete(@Param('id') id: string) {
     await this.productsService.deleteProduct(id);
     return { message: 'Product deleted successfully' };
+  }
+
+  @Patch(':id')
+  @UseInterceptors(NoFilesInterceptor())
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: UpdateProductDto })
+  async updateProduct(@Param('id') id: string, @Body() body: UpdateProductDto) {
+    return this.productsService.updateById(id, body);
+  }
+
+  @Patch(':id/active')
+  @UseInterceptors(NoFilesInterceptor())
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: UpdateActiveDto })
+  async updateProductVisisbillity(
+    @Param('id') id: string,
+    @Body() body: UpdateActiveDto,
+  ) {
+    return this.productsService.updateActiveById(id, body);
   }
 }
