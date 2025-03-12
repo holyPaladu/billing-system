@@ -15,7 +15,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Category } from './entyties/category.entity';
+import { Category } from './entities/category.entity';
 import { CreateCategoryDto } from './dto/category.dto';
 import { NoFilesInterceptor } from '@nestjs/platform-express';
 

@@ -80,30 +80,30 @@ services:
       - /app/node_modules
     command: npm run start
 
-  # order-service:
-  #   build:
-  #     context: ./order-service
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8083:3003"
-  #   environment:
-  #     NODE_ENV: development
-  #     DATABASE_HOST: postgres-db
-  #     DATABASE_PORT: 5432
-  #     DATABASE_USER: postgres
-  #     DATABASE_PASSWORD: postgres
-  #     DATABASE_NAME: orderdb
-  #     JWT_SECRET: authjwtsecretkey
-  #     JWT_REFRESH_SECRET: supersecretrefreshkey
-  #   depends_on:
-  #     - postgres-db
-  #     - kafka
-  #   networks:
-  #     - app-networks
-  #   volumes:
-  #     - ./order-service:/app
-  #     - /app/node_modules
-  #   command: npm run start
+  subscription-service:
+    build:
+      context: ./subscription-service
+      dockerfile: Dockerfile
+    ports:
+      - "8083:3003"
+    environment:
+      NODE_ENV: development
+      DATABASE_HOST: postgres-db
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_NAME: subscriptiondb
+      JWT_SECRET: authjwtsecretkey
+      JWT_REFRESH_SECRET: supersecretrefreshkey
+    depends_on:
+      - postgres-db
+      - kafka
+    networks:
+      - app-networks
+    volumes:
+      - ./subscription-service:/app
+      - /app/node_modules
+    command: npm run start
 
   postgres-db:
     image: postgres:15
