@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   Subscription,
-  BillingPlan,
   SubscriptionStatus,
+  BillingPlan,
 } from './entities/subscription.entity';
 import { Repository } from 'typeorm';
 import { calculateSubscriptionDates } from './utils/sub-dates.util';

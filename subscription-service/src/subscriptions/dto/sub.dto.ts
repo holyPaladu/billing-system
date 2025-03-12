@@ -1,18 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
+import { BillingPlan } from '../entities/subscription.entity';
 
-export enum BillingPlanEnum {
-  MONTHLY = 'monthly',
-  YEARLY = 'yearly',
-  QUARTERLY = 'quarterly',
-}
-
-export class BillingPlan {
-  @ApiProperty({
-    example: BillingPlanEnum.MONTHLY,
-    description: '[monthly, yearly, quarterly]',
-    required: false,
-  })
-  @IsEnum(BillingPlanEnum)
-  plan: BillingPlanEnum;
+export class CreateSubscriptionDto {
+  @IsEnum(BillingPlan)
+  billingPlan: BillingPlan;
 }

@@ -1,8 +1,22 @@
-import { Controller, Param, Post, Req, UseGuards, Body } from '@nestjs/common';
+import {
+  Controller,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+  Body,
+  UseInterceptors,
+} from '@nestjs/common';
 import { SubscriptionsService } from './subscriptions.service';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
-import { BillingPlan } from './entities/subscription.entity';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+} from '@nestjs/swagger';
+import { CreateSubscriptionDto } from './dto/sub.dto';
+import { NoFilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('subscriptions')
 export class SubscriptionsController {
@@ -11,17 +25,20 @@ export class SubscriptionsController {
   @Post('create/:productId')
   @ApiOperation({ summary: 'create subcsription' })
   @ApiBearerAuth()
+  @UseInterceptors(NoFilesInterceptor())
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: CreateSubscriptionDto })
   @UseGuards(AuthGuard('jwt'))
   async(
     @Req() req,
     @Param('productId') productId: string,
-    @Body('billingPlan') billingPlan: BillingPlan,
+    @Body('billingPlan') dto: CreateSubscriptionDto,
   ) {
     const userId = req.user.id;
     return this.subscriptionsService.createSubscription(
       userId,
       productId,
-      billingPlan,
+      dto.billingPlan,
     );
   }
 }
