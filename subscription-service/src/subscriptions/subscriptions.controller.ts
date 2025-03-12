@@ -32,9 +32,9 @@ export class SubscriptionsController {
   async(
     @Req() req,
     @Param('productId') productId: string,
-    @Body('billingPlan') dto: CreateSubscriptionDto,
+    @Body() dto: CreateSubscriptionDto,
   ) {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     return this.subscriptionsService.createSubscription(
       userId,
       productId,
