@@ -24,10 +24,10 @@ export class Subscription {
   id: string;
 
   @Column()
-  userId: string; 
+  userId: number;
 
   @Column()
-  productId: string; 
+  productId: string;
 
   @Column({
     type: 'enum',
