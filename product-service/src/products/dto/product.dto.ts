@@ -1,12 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
   IsUUID,
 } from 'class-validator';
+
+export enum BillingPlan {
+  MONTHLY = 'monthly',
+  YEARLY = 'yearly',
+  QUARTERLY = 'quarterly',
+}
 
 export class GetProductsDto {
   @ApiProperty({
@@ -49,6 +56,13 @@ export class CreateProductDto {
   @ApiProperty({ example: true, description: 'Активен ли продукт' })
   @IsBoolean()
   is_active: boolean;
+
+  @ApiProperty({
+    example: 'monthly',
+    description: 'Product plan for billing pay [monthly, yearly, quarterly]',
+  })
+  @IsEnum(BillingPlan)
+  plan: BillingPlan;
 
   @ApiProperty({
     example: '550e8400-e29b-41d4-a716-446655440000',
@@ -94,6 +108,15 @@ export class UpdateProductDto {
   @IsOptional()
   @IsUUID()
   categoryId?: string;
+
+  @ApiProperty({
+    example: 'monthly',
+    description: 'Product plan for billing pay [monthly, yearly, quarterly]',
+    required: false,
+  })
+  @IsEnum(BillingPlan)
+  @IsOptional()
+  plan?: BillingPlan;
 }
 
 export class UpdateActiveDto {

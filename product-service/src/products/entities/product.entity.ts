@@ -8,6 +8,12 @@ import {
   ManyToOne,
 } from 'typeorm';
 
+export enum BillingPlan {
+  MONTHLY = 'monthly',
+  YEARLY = 'yearly',
+  QUARTERLY = 'quarterly',
+}
+
 @Entity('products')
 export class Product {
   @PrimaryGeneratedColumn('uuid')
@@ -24,6 +30,13 @@ export class Product {
 
   @Column({ default: false })
   is_active: boolean;
+
+  @Column({
+    type: 'enum',
+    enum: BillingPlan,
+    default: BillingPlan.MONTHLY,
+  })
+  plan: BillingPlan;
 
   @ManyToOne(() => Category, (category) => category.products, {
     nullable: false,
