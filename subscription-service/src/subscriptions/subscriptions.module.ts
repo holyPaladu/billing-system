@@ -4,10 +4,32 @@ import { SubscriptionsController } from './subscriptions.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Subscription } from './entities/subscription.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { SubscriptionCronService } from './subsription-cron.service';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Subscription]), JwtModule.register({})],
+  imports: [
+    TypeOrmModule.forFeature([Subscription]),
+    JwtModule.register({}),
+    ClientsModule.register([
+      {
+        name: 'KAFKA_SERVICE',
+        transport: Transport.KAFKA,
+        options: {
+          client: {
+            brokers: ['kafka:9092'],
+          },
+          producer: {
+            allowAutoTopicCreation: true,
+          },
+          consumer: {
+            groupId: 'subscription-group',
+          },
+        },
+      },
+    ]),
+  ],
   controllers: [SubscriptionsController],
-  providers: [SubscriptionsService],
+  providers: [SubscriptionsService, SubscriptionCronService],
 })
 export class SubscriptionsModule {}

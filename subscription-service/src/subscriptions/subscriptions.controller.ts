@@ -19,6 +19,7 @@ import {
 } from '@nestjs/swagger';
 import { CreateSubscriptionDto } from './dto/sub.dto';
 import { NoFilesInterceptor } from '@nestjs/platform-express';
+import { EventPattern, Payload } from '@nestjs/microservices';
 
 @Controller('subscriptions')
 export class SubscriptionsController {
@@ -38,6 +39,7 @@ export class SubscriptionsController {
   ) {
     return this.subscriptionsService.createSubscription(
       req.user.userId,
+      req.user.email,
       productId,
       dto.billingPlan,
     );

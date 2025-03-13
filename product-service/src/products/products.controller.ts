@@ -33,6 +33,7 @@ import {
   UpdateProductDto,
 } from './dto/product.dto';
 import { NoFilesInterceptor } from '@nestjs/platform-express';
+import { EventPattern, Payload } from '@nestjs/microservices';
 
 @ApiTags('Products')
 @ApiExtraModels(GetProductsDto) // Автоматически документирует DTO
@@ -108,5 +109,10 @@ export class ProductsController {
     @Body() body: UpdateActiveDto,
   ) {
     return this.productsService.updateActiveById(id, body);
+  }
+
+  @EventPattern('billing.notification.reminder')
+  async handleBillingReminder(@Payload() data: any) {
+    this.productsService.notificationReminder(data);
   }
 }

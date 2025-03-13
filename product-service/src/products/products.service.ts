@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
@@ -9,6 +9,7 @@ import {
   UpdateProductDto,
 } from './dto/product.dto';
 import { CategoriesService } from 'src/categories/categories.service';
+import { ClientKafka } from '@nestjs/microservices';
 
 @Injectable()
 export class ProductsService {
@@ -16,6 +17,7 @@ export class ProductsService {
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
     private readonly categoryService: CategoriesService,
+    @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
   ) {}
 
   //! BASE SERVICE
@@ -68,7 +70,6 @@ export class ProductsService {
       );
       product.category = category;
     }
-
     // Убираем undefined, чтобы не затирать поля
     const filteredData = Object.fromEntries(
       Object.entries(updatedData).filter(
@@ -78,7 +79,6 @@ export class ProductsService {
     Object.assign(product, filteredData);
     return this.productRepository.save(product);
   }
-
   async updateActiveById(id: string, updatedData: UpdateActiveDto) {
     const product = await this.findProductById(id);
     if (updatedData.is_active !== null || updatedData.is_active !== undefined) {
@@ -95,5 +95,22 @@ export class ProductsService {
     return {
       success: true,
     };
+  }
+
+  //! EventPattern
+  async notificationReminder(data: any) {
+    const { subId, userEmail, productId } = data;
+    const product = await this.findProductById(productId);
+
+    this.kafkaClient.emit('billing.notification.reminder.product', {
+      subId,
+      userEmail,
+      product: {
+        price: product.price,
+        plan: product.plan,
+        name: product.name,
+        is_active: product.is_active,
+      },
+    });
   }
 }

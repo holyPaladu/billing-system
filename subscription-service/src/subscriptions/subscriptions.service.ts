@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   Subscription,
@@ -7,16 +7,19 @@ import {
 } from './entities/subscription.entity';
 import { Repository } from 'typeorm';
 import { calculateSubscriptionDates } from './utils/sub-dates.util';
+import { ClientKafka } from '@nestjs/microservices';
 
 @Injectable()
 export class SubscriptionsService {
   constructor(
     @InjectRepository(Subscription)
     private readonly subRepository: Repository<Subscription>,
+    @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
   ) {}
 
   async createSubscription(
     userId: number,
+    email: string,
     productId: string,
     plan: BillingPlan,
   ) {
@@ -25,6 +28,7 @@ export class SubscriptionsService {
 
     const subscription = this.subRepository.create({
       userId,
+      userEmail: email,
       productId,
       billingPlan: plan,
       startDate,
@@ -37,7 +41,7 @@ export class SubscriptionsService {
   }
 
   async getAllSubscriptions() {
-    return this.subRepository.find();
+    return await this.subRepository.find();
   }
   async getSubscriptionByUserId(userId: number) {
     const subWithUserId = await this.subRepository.find({ where: { userId } });
@@ -55,5 +59,36 @@ export class SubscriptionsService {
 
   async deleteSubscription(subscriptionId: string) {
     return this.subRepository.delete(subscriptionId);
+  }
+
+  //! CRON tasks
+  async checkSubscriptions() {
+    const subscriptions = await this.getAllSubscriptions();
+    const now = new Date();
+
+    for (const subscription of subscriptions) {
+      if (
+        subscription.status === SubscriptionStatus.PAUSE ||
+        subscription.status === SubscriptionStatus.EXPIRE
+      ) {
+        continue;
+      }
+
+      const nextBillingDate = new Date(subscription.nextBillingDate);
+      const diffDays = Math.floor(
+        (nextBillingDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+      );
+
+      if (diffDays === 2) {
+        this.kafkaClient.emit('billing.notification.reminder', {
+          subId: subscription.id,
+          userEmail: subscription.userEmail,
+          productId: subscription.productId,
+        });
+      }
+      if (diffDays === 0) {
+        this.kafkaClient.emit('billing.payment.charge', {});
+      }
+    }
   }
 }

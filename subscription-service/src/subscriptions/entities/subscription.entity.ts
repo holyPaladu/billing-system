@@ -27,6 +27,9 @@ export class Subscription {
   userId: number;
 
   @Column()
+  userEmail: string;
+
+  @Column()
   productId: string;
 
   @Column({
