@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   Subscription,
@@ -34,5 +34,26 @@ export class SubscriptionsService {
     });
 
     return this.subRepository.save(subscription);
+  }
+
+  async getAllSubscriptions() {
+    return this.subRepository.find();
+  }
+  async getSubscriptionByUserId(userId: number) {
+    const subWithUserId = await this.subRepository.find({ where: { userId } });
+    if (!subWithUserId) throw new NotFoundException('Subscription not found');
+    return subWithUserId;
+  }
+  async getSubscriptionByProductId(productId: string) {
+    const subWithProductId = await this.subRepository.find({
+      where: { productId },
+    });
+    if (!subWithProductId)
+      throw new NotFoundException('Subscription not found');
+    return subWithProductId;
+  }
+
+  async deleteSubscription(subscriptionId: string) {
+    return this.subRepository.delete(subscriptionId);
   }
 }

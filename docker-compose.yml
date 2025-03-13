@@ -105,6 +105,31 @@ services:
       - /app/node_modules
     command: npm run start
 
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    ports:
+      - "8084:3004"
+    environment:
+      NODE_ENV: development
+      DATABASE_HOST: postgres-db
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_NAME: paymentdb
+      JWT_SECRET: authjwtsecretkey
+      JWT_REFRESH_SECRET: supersecretrefreshkey
+    depends_on:
+      - postgres-db
+      - kafka
+    networks:
+      - app-networks
+    volumes:
+      - ./payment-service:/app
+      - /app/node_modules
+    command: npm run start
+
   postgres-db:
     image: postgres:15
     restart: always
