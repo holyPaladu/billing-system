@@ -117,7 +117,7 @@ export class ProductsService {
     const { subId, userEmail, productId } = data;
     const product = await this.findProductById(productId);
 
-    this.kafkaClient.emit('subscription.payment', {
+    this.kafkaClient.emit('subscription.payment.getUser', {
       subId,
       userEmail,
       product: {

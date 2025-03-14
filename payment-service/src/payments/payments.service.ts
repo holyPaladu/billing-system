@@ -3,6 +3,7 @@ import { ClientKafka } from '@nestjs/microservices';
 import { Payment, paymentStatus } from './entities/payment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import Stripe from 'stripe';
 
 @Injectable()
 export class PaymentsService {
@@ -10,16 +11,17 @@ export class PaymentsService {
     @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
     @InjectRepository(Payment)
     private readonly paymentRepository: Repository<Payment>,
+    @Inject('STRIPE') private readonly stripe: Stripe,
   ) {}
 
-  async paying(payment: Payment, price: number) {
+  async paying(payment: Payment) {
     try {
-      // const stripeResponse = await stripe.paymentIntents.create({
-      //   amount: price * 100,
-      //   currency: 'KZT',
-      //   payment_method: 'stripe',
-      // });
-      payment.transactionId = 'unique_transaction_code'; // Симуляция успешного платежа
+      const stripeResponse = await this.stripe.paymentIntents.create({
+        amount: payment.amount * 100,
+        currency: payment.currency,
+        payment_method: 'stripe',
+      });
+      payment.transactionId = stripeResponse.id;
       payment.status = paymentStatus.SUCCESS;
     } catch (error) {
       console.log(error);
@@ -36,10 +38,10 @@ export class PaymentsService {
     const payment = new Payment();
     payment.subscriptionId = subId;
     payment.amount = product.price;
-    payment.currency = 'KZT'; // Валюта обязательна!
+    payment.currency = 'KZT';
     payment.status = paymentStatus.PENDING;
     await this.paymentRepository.save(payment);
 
-    await this.paying(payment, product.price);
+    await this.paying(payment);
   }
 }

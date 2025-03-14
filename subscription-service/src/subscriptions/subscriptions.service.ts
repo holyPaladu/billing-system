@@ -70,7 +70,7 @@ export class SubscriptionsService {
     });
   }
   private processSubscription(subscription: Subscription) {
-    this.kafkaClient.emit('subscription.product', {
+    this.kafkaClient.emit('subscription.payment.getProduct', {
       subId: subscription.id,
       userEmail: subscription.userEmail,
       productId: subscription.productId,
