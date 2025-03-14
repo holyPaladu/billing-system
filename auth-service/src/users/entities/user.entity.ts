@@ -29,6 +29,12 @@ export class User {
   @Column({ default: false })
   is_email_verified: boolean;
 
+  @Column({ nullable: true })
+  stripeCustomerId: string; // ID клиента в Stripe
+
+  @Column({ nullable: true })
+  stripePaymentMethodId: string; // Токен платежного метода
+
   @CreateDateColumn()
   createdAt: Date;
 
