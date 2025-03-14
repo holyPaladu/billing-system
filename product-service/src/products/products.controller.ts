@@ -111,8 +111,13 @@ export class ProductsController {
     return this.productsService.updateActiveById(id, body);
   }
 
+  //! KAFKA CONSUMER
   @EventPattern('billing.notification.reminder')
   async handleBillingReminder(@Payload() data: any) {
     this.productsService.notificationReminder(data);
+  }
+  @EventPattern('subscription.product')
+  async handleSubToProduct(@Payload() data: any) {
+    this.productsService.handleProductToPayment(data);
   }
 }

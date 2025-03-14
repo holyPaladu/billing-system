@@ -113,4 +113,19 @@ export class ProductsService {
       },
     });
   }
+  async handleProductToPayment(data: any) {
+    const { subId, userEmail, productId } = data;
+    const product = await this.findProductById(productId);
+
+    this.kafkaClient.emit('subscription.payment', {
+      subId,
+      userEmail,
+      product: {
+        price: product.price,
+        plan: product.plan,
+        name: product.name,
+        is_active: product.is_active,
+      },
+    });
+  }
 }
