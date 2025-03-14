@@ -14,6 +14,13 @@ export class PaymentsService {
     @Inject('STRIPE') private readonly stripe: Stripe,
   ) {}
 
+  private sendTopic(topic: string, payment: Payment, user: any) {
+    this.kafkaClient.emit(topic, {
+      payment,
+      user,
+    });
+  }
+
   async paying(payment: Payment, user: any) {
     try {
       const stripeResponse = await this.stripe.paymentIntents.create({
@@ -29,6 +36,8 @@ export class PaymentsService {
       payment.status = paymentStatus.FAILED;
     } finally {
       await this.paymentRepository.save(payment);
+
+      this.sendTopic('notification.paying', payment, user);
     }
   }
 

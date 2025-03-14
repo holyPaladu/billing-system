@@ -21,4 +21,9 @@ export class NotificationController {
     const { subId, userEmail, product } = data;
     this.emailService.sendReminder(subId, userEmail, product);
   }
+
+  @EventPattern('notification.paying')
+  async handlePayingStatus(@Payload() data: any){
+    return this.emailService.sendPayingStatus(data);
+  }
 }

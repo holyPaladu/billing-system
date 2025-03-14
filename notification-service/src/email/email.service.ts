@@ -176,4 +176,46 @@ export class EmailService {
       console.error('Error sending email:', error);
     }
   }
+
+  async sendPayingStatus(data: { payment: any; user: any }) {
+    const { payment, user } = data;
+    const isSuccess = payment.status === 'success';
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: isSuccess ? '✅ Оплата прошла успешно' : '❌ Ошибка платежа',
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 500px; margin: auto; border-radius: 8px; ${
+          isSuccess
+            ? 'background: #e6ffed; color: #2e7d32;'
+            : 'background: #ffebee; color: #c62828;'
+        }">
+          <h2 style="text-align: center;">${isSuccess ? '✅ Оплата успешно завершена' : '❌ Ошибка платежа'}</h2>
+          <p>Здравствуйте, <strong>${user.email}</strong>,</p>
+          <p>${
+            isSuccess
+              ? `Ваш платеж на сумму <strong>${payment.amount} ${payment.currency}</strong> успешно обработан.`
+              : `К сожалению, произошла ошибка при оплате <strong>${payment.amount} ${payment.currency}</strong>. Пожалуйста, попробуйте снова.`
+          }</p>
+          <p>Номер транзакции: <strong>${payment.transactionId || 'Не найден'}</strong></p>
+          <p style="margin-top: 20px; text-align: center;">
+            <a href="https://yourapp.com/payments" style="display: inline-block; padding: 10px 20px; color: white; text-decoration: none; border-radius: 5px; ${
+              isSuccess ? 'background: #2e7d32;' : 'background: #c62828;'
+            }">
+              ${isSuccess ? 'Перейти в личный кабинет' : 'Попробовать снова'}
+            </a>
+          </p>
+          <p style="font-size: 12px; text-align: center; margin-top: 20px; color: #666;">Если у вас возникли вопросы, свяжитесь с нами.</p>
+        </div>
+      `,
+    };
+
+    try {
+      await this.transporter.sendMail(mailOptions);
+      console.log('Email sent successfully');
+    } catch (error) {
+      console.error('Error sending email:', error);
+    }
+  }
 }
