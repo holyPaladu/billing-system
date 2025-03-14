@@ -76,11 +76,4 @@ export class UsersService {
       },
     });
   }
-
-  //! Consumer
-  async getUserDataForPayment(data: any) {
-    const { subId, userEmail, product } = data;
-    const user = await this.findByEmail(userEmail);
-    this.sendTopic('subscription.payment.paid', data, user);
-  }
 }

@@ -42,7 +42,7 @@ export class PaymentsService {
   }
 
   async createInitialPayment(data: any) {
-    const { subId, product, user } = data;
+    const { subId, user, product } = data;
 
     const payment = new Payment();
     payment.subscriptionId = subId;

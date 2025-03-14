@@ -69,11 +69,50 @@ export class SubscriptionsService {
       productId: subscription.productId,
     });
   }
-  private processSubscription(subscription: Subscription) {
-    this.kafkaClient.emit('subscription.payment.getProduct', {
-      subId: subscription.id,
-      userEmail: subscription.userEmail,
-      productId: subscription.productId,
+  private async processSubscription(subscription: Subscription) {
+    try {
+      // 1️⃣ Запрашиваем пользователя
+      const user = await this.requestUser(subscription.userEmail);
+      if (!user) {
+        console.error(`❌ Пользователь ${subscription.userEmail} не найден!`);
+        return;
+      }
+
+      // 2️⃣ Запрашиваем продукт
+      const product = await this.requestProduct(subscription.productId);
+      if (!product) {
+        console.error(`❌ Продукт ${subscription.productId} не найден!`);
+        return;
+      }
+
+      // 3️⃣ Отправляем данные в оплату
+      this.kafkaClient.emit('subscription.payment.paid', {
+        subId: subscription.id,
+        user,
+        product,
+      });
+
+      console.log(`✅ Отправлен запрос на оплату: subId ${subscription.id}`);
+    } catch (error) {
+      console.error('❌ Ошибка обработки подписки:', error);
+    }
+  }
+
+  private async requestUser(email: string) {
+    return new Promise((resolve) => {
+      this.kafkaClient.send('user.getByEmail', { email }).subscribe({
+        next: (user) => resolve(user),
+        error: () => resolve(null),
+      });
+    });
+  }
+
+  private async requestProduct(productId: string) {
+    return new Promise((resolve) => {
+      this.kafkaClient.send('product.getById', { productId }).subscribe({
+        next: (product) => resolve(product),
+        error: () => resolve(null),
+      });
     });
   }
   //! CRON task
