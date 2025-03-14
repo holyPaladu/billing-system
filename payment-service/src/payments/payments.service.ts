@@ -14,12 +14,12 @@ export class PaymentsService {
     @Inject('STRIPE') private readonly stripe: Stripe,
   ) {}
 
-  async paying(payment: Payment) {
+  async paying(payment: Payment, user: any) {
     try {
       const stripeResponse = await this.stripe.paymentIntents.create({
         amount: payment.amount * 100,
         currency: payment.currency,
-        payment_method: 'stripe',
+        payment_method: user.paymentMethod,
       });
       payment.transactionId = stripeResponse.id;
       payment.status = paymentStatus.SUCCESS;
@@ -33,7 +33,7 @@ export class PaymentsService {
   }
 
   async createInitialPayment(data: any) {
-    const { subId, userEmail, product } = data;
+    const { subId, product, user } = data;
 
     const payment = new Payment();
     payment.subscriptionId = subId;
@@ -42,6 +42,6 @@ export class PaymentsService {
     payment.status = paymentStatus.PENDING;
     await this.paymentRepository.save(payment);
 
-    await this.paying(payment);
+    await this.paying(payment, user);
   }
 }

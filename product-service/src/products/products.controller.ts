@@ -116,8 +116,8 @@ export class ProductsController {
   async handleBillingReminder(@Payload() data: any) {
     this.productsService.notificationReminder(data);
   }
-  // @EventPattern('subscription.payment.getProduct')
-  // async handleSubToProduct(@Payload() data: any) {
-  //   this.productsService.handleProductToPayment(data);
-  // }
+  @EventPattern('subscription.payment.getProduct')
+  async handleSubToProduct(@Payload() data: any) {
+    this.productsService.handleProductToPayment(data);
+  }
 }

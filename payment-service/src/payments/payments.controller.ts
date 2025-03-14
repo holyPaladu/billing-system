@@ -6,8 +6,8 @@ import { EventPattern, Payload } from '@nestjs/microservices';
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
-  @EventPattern('subscription.payment.createPayment')
+  @EventPattern('subscription.payment.paid')
   async handleSubToProduct(@Payload() data: any) {
-    return;
+    return this.paymentsService.createInitialPayment(data);
   }
 }

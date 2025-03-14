@@ -21,6 +21,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { UserPaymentDto } from './dto/user.dto';
 import { NoFilesInterceptor } from '@nestjs/platform-express';
+import { EventPattern, Payload } from '@nestjs/microservices';
 
 @Controller('users')
 export class UsersController {
@@ -73,5 +74,11 @@ export class UsersController {
       req.user.userId,
       bd.paymentMethodId,
     );
+  }
+
+  //! EVENTPATTERN
+  @EventPattern('subscription.payment.getUser')
+  async getUser(@Payload() data: any) {
+    return this.usersService.getUserDataForPayment(data);
   }
 }

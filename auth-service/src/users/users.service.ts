@@ -3,12 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import Stripe from 'stripe';
+import { ClientKafka } from '@nestjs/microservices';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     @Inject('STRIPE') private readonly stripe: Stripe,
+    @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
   ) {}
 
   async findAll() {
@@ -59,5 +61,26 @@ export class UsersService {
     // Обновление в базе данных
     user.stripePaymentMethodId = newPaymentMethodId;
     await this.userRepository.save(user);
+  }
+
+  //! Producer
+  //? Emit
+  private sendTopic(topic: string, data: any, user: any) {
+    this.kafkaClient.emit(topic, {
+      subId: data.subId,
+      product: data.product,
+      user: {
+        id: user.id,
+        email: user.email,
+        paymentMethod: user.stripePaymentMethodId,
+      },
+    });
+  }
+
+  //! Consumer
+  async getUserDataForPayment(data: any) {
+    const { subId, userEmail, product } = data;
+    const user = await this.findByEmail(userEmail);
+    this.sendTopic('subscription.payment.paid', data, user);
   }
 }
