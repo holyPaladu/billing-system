@@ -6,7 +6,7 @@ import { SubscriptionsService } from './subscriptions.service';
 export class SubscriptionCronService {
   constructor(private readonly subscriptionService: SubscriptionsService) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT) 
   async handleCron() {
     console.log('Running daily subscription check');
     await this.subscriptionService.checkSubscriptions();

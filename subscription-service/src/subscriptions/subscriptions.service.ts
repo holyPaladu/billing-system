@@ -61,7 +61,22 @@ export class SubscriptionsService {
     return this.subRepository.delete(subscriptionId);
   }
 
-  //! CRON tasks
+  //! KAFKA producer
+  private sendBillingReminder(subscription: Subscription) {
+    this.kafkaClient.emit('billing.notification.reminder', {
+      subId: subscription.id,
+      userEmail: subscription.userEmail,
+      productId: subscription.productId,
+    });
+  }
+  private processSubscription(subscription: Subscription) {
+    this.kafkaClient.emit('subscription.product', {
+      subId: subscription.id,
+      userEmail: subscription.userEmail,
+      productId: subscription.productId,
+    });
+  }
+  //! CRON task
   async checkSubscriptions() {
     const subscriptions = await this.getAllSubscriptions();
     const now = new Date();
@@ -80,14 +95,12 @@ export class SubscriptionsService {
       );
 
       if (diffDays === 2) {
-        this.kafkaClient.emit('billing.notification.reminder', {
-          subId: subscription.id,
-          userEmail: subscription.userEmail,
-          productId: subscription.productId,
-        });
-      }
-      if (diffDays === 0) {
-        this.kafkaClient.emit('billing.payment.charge', {});
+        this.sendBillingReminder(subscription);
+      } else if (diffDays === 0) {
+        this.processSubscription(subscription);
+      } else if (diffDays < 0) {
+        subscription.status = SubscriptionStatus.EXPIRE;
+        await this.subRepository.save(subscription);
       }
     }
   }
