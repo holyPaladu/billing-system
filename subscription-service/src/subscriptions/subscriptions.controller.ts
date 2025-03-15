@@ -19,7 +19,6 @@ import {
 } from '@nestjs/swagger';
 import { CreateSubscriptionDto } from './dto/sub.dto';
 import { NoFilesInterceptor } from '@nestjs/platform-express';
-import { EventPattern, Payload } from '@nestjs/microservices';
 
 @Controller('subscriptions')
 export class SubscriptionsController {

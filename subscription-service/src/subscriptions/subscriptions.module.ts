@@ -23,7 +23,10 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
             allowAutoTopicCreation: true,
           },
           consumer: {
-            groupId: 'subscription-group',
+            groupId: 'subscription-group-client',
+          },
+          subscribe: {
+            fromBeginning: true, // Подписываться на сообщения с начала топика
           },
         },
       },

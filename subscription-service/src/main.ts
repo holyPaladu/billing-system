@@ -23,7 +23,10 @@ async function bootstrap() {
         brokers: ['kafka:9092'],
       },
       consumer: {
-        groupId: 'subscription-group',
+        groupId: 'subscription-group-server',
+      },
+      subscribe: {
+        fromBeginning: true, // Подписываться на сообщения с начала топика
       },
     },
   });

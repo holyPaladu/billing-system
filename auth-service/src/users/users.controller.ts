@@ -22,6 +22,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { UserPaymentDto } from './dto/user.dto';
 import { NoFilesInterceptor } from '@nestjs/platform-express';
 import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
+import { instanceToPlain } from 'class-transformer';
 
 @Controller('users')
 export class UsersController {
@@ -79,7 +80,10 @@ export class UsersController {
   //! EVENTPATTERN
   @MessagePattern('user.getByEmail')
   async getUser(@Payload() data: any) {
+    console.log(`📩 Получен запрос в MessagePattern:`, data);
     const { email } = data;
-    return this.usersService.findByEmail(email);
+    const user = await this.usersService.findByEmail(email);
+    console.log(`✅ Найден пользователь:`, user);
+    return instanceToPlain(user);
   }
 }

@@ -1,4 +1,9 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   Subscription,
@@ -8,14 +13,20 @@ import {
 import { Repository } from 'typeorm';
 import { calculateSubscriptionDates } from './utils/sub-dates.util';
 import { ClientKafka } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
-export class SubscriptionsService {
+export class SubscriptionsService implements OnModuleInit {
   constructor(
     @InjectRepository(Subscription)
     private readonly subRepository: Repository<Subscription>,
     @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
   ) {}
+  async onModuleInit() {
+    // Подписываемся на ответный топик
+    this.kafkaClient.subscribeToResponseOf('user.getByEmail');
+    await this.kafkaClient.connect();
+  }
 
   async createSubscription(
     userId: number,
@@ -99,21 +110,27 @@ export class SubscriptionsService {
   }
 
   private async requestUser(email: string) {
-    return new Promise((resolve) => {
-      this.kafkaClient.send('user.getByEmail', { email }).subscribe({
-        next: (user) => resolve(user),
-        error: () => resolve(null),
-      });
-    });
+    try {
+      const user = await firstValueFrom(
+        this.kafkaClient.send('user.getByEmail', { email }),
+      );
+      return user;
+    } catch (error) {
+      console.error('Ошибка при запросе пользователя:', error);
+      return null;
+    }
   }
 
   private async requestProduct(productId: string) {
-    return new Promise((resolve) => {
-      this.kafkaClient.send('product.getById', { productId }).subscribe({
-        next: (product) => resolve(product),
-        error: () => resolve(null),
-      });
-    });
+    try {
+      const product = await firstValueFrom(
+        this.kafkaClient.send('product.getById', { productId }),
+      );
+      return product;
+    } catch (error) {
+      console.error('Ошибка при запросе продукта:', error);
+      return null;
+    }
   }
   //! CRON task
   async checkSubscriptions() {
@@ -141,6 +158,11 @@ export class SubscriptionsService {
         subscription.status = SubscriptionStatus.EXPIRE;
         await this.subRepository.save(subscription);
       }
+      // else if (diffDays > 2) {
+      //   const data = await this.requestUser(subscription.userEmail);
+      //   console.log(typeof data, data);
+      //   console.log(JSON.stringify(data, null, 2), subscription.userEmail);
+      // }
     }
   }
 }

@@ -34,6 +34,7 @@ import {
 } from './dto/product.dto';
 import { NoFilesInterceptor } from '@nestjs/platform-express';
 import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
+import { instanceToPlain } from 'class-transformer';
 
 @ApiTags('Products')
 @ApiExtraModels(GetProductsDto) // Автоматически документирует DTO
@@ -119,6 +120,7 @@ export class ProductsController {
   @MessagePattern('product.getById')
   async getProduct(@Payload() data: any) {
     const { productId } = data;
-    return this.productsService.findProductById(productId);
+    const product = await this.productsService.findProductById(productId);
+    return instanceToPlain(product);
   }
 }
